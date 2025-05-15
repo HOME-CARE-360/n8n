@@ -1,0 +1,2 @@
+{"__type":"$$EventMessageAudit","id":"a5b80552-7d1c-48fe-9900-01b914a67c32","ts":"2025-05-15T00:22:17.823+00:00","eventName":"n8n.audit.user.login.success","message":"n8n.audit.user.login.success","payload":{"userId":"5d7e4ee5-029c-4d29-b3f5-190cfd41764d","_email":"chucongdanh2703@gmail.com","_firstName":"Cong ","_lastName":"Danh","globalRole":"global:owner","authenticationMethod":"email"}}
+{"__type":"$$EventMessageConfirm","confirm":"a5b80552-7d1c-48fe-9900-01b914a67c32","ts":"2025-05-15T00:22:17.824+00:00","source":{"id":"0","name":"eventBus"}}
