@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {"__type":"$$EventMessageAudit","id":"575630f6-f545-46b3-97e0-942df76ff23e","ts":"2025-05-22T03:08:16.967+00:00","eventName":"n8n.audit.user.login.success","message":"n8n.audit.user.login.success","payload":{"userId":"5d7e4ee5-029c-4d29-b3f5-190cfd41764d","_email":"chucongdanh2703@gmail.com","_firstName":"Cong ","_lastName":"Danh","globalRole":"global:owner","authenticationMethod":"email"}}
 {"__type":"$$EventMessageConfirm","confirm":"575630f6-f545-46b3-97e0-942df76ff23e","ts":"2025-05-22T03:08:16.968+00:00","source":{"id":"0","name":"eventBus"}}
 {"__type":"$$EventMessageAudit","id":"ca24d074-7ba5-44f5-91c7-96fd9a40d3bb","ts":"2025-05-22T03:08:32.937+00:00","eventName":"n8n.audit.user.login.failed","message":"n8n.audit.user.login.failed","payload":{"authenticationMethod":"email","userEmail":"danhccse172215@fpt.edu.vn","reason":"wrong credentials"}}
@@ -174,3 +175,7 @@
 {"__type":"$$EventMessageConfirm","confirm":"9678727c-1d80-4583-a9d2-70cf534ba05c","ts":"2025-05-21T23:26:10.356-04:00","source":{"id":"0","name":"eventBus"}}
 {"__type":"$$EventMessageWorkflow","id":"b00b7d5d-edd0-4fa3-a57c-cf3aa7e80885","ts":"2025-05-21T23:26:10.357-04:00","eventName":"n8n.workflow.success","message":"n8n.workflow.success","payload":{"executionId":"55","userId":"5d7e4ee5-029c-4d29-b3f5-190cfd41764d","success":true,"isManual":true,"workflowId":"SdWnVH4l4KOIPibp","workflowName":"My workflow"}}
 {"__type":"$$EventMessageConfirm","confirm":"b00b7d5d-edd0-4fa3-a57c-cf3aa7e80885","ts":"2025-05-21T23:26:10.357-04:00","source":{"id":"0","name":"eventBus"}}
+=======
+{"__type":"$$EventMessageAudit","id":"a5b80552-7d1c-48fe-9900-01b914a67c32","ts":"2025-05-15T00:22:17.823+00:00","eventName":"n8n.audit.user.login.success","message":"n8n.audit.user.login.success","payload":{"userId":"5d7e4ee5-029c-4d29-b3f5-190cfd41764d","_email":"chucongdanh2703@gmail.com","_firstName":"Cong ","_lastName":"Danh","globalRole":"global:owner","authenticationMethod":"email"}}
+{"__type":"$$EventMessageConfirm","confirm":"a5b80552-7d1c-48fe-9900-01b914a67c32","ts":"2025-05-15T00:22:17.824+00:00","source":{"id":"0","name":"eventBus"}}
+>>>>>>> 1cd2e1ecb3b1b046ea2b5ef59cdea31dc9c8627d
