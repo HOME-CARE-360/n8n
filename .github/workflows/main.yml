@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: 📦 Checkout source
         uses: actions/checkout@v4
-  
+
       - name: 📁 Upload docker-compose.yml & .env to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -31,9 +31,6 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USER }}/projects/capstone/n8n
 
-            echo "📦 Stopping current containers..."
-            docker-compose down --remove-orphans || true
-
             echo "💾 Creating backup if exists..."
             if [ -d "n8n_data" ]; then
               tar -czf "n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
@@ -41,18 +38,12 @@ jobs:
             fi
 
             echo "📥 Build Docker image..."
-            docker-compose build
+            docker compose build
 
             echo "🚀 Starting containers..."
-            docker-compose up -d
-
-            echo "⏳ Waiting for N8N to be ready..."
-            sleep 20
+            docker compose up -d
 
             echo "🔍 Checking service status..."
-            docker-compose ps
-
-            # echo "🧹 Cleaning up unused Docker images..."
-            # docker image prune -f
+            docker compose ps
 
             echo "✅ Deployment completed!"
