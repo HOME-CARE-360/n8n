@@ -6,46 +6,23 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Validate docker-compose.yml
-        run: |
-          docker-compose config
-          echo "✅ Docker Compose configuration is valid"
-
-      - name: Check environment files
-        run: |
-          if [ -f "env.example" ]; then
-            echo "✅ env.example exists"
-          else
-            echo "⚠️ env.example not found, will create basic .env"
-          fi
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout source
+      - name: 📦 Checkout source
         uses: actions/checkout@v4
 
-      - name: Create .env file
+      - name: 🛠️ Generate .env file
         run: |
-          cat > .env << EOF
-          N8N_USER=admin
-          N8N_PASSWORD=admin123
-          N8N_HOST=0.0.0.0
-          N8N_EDITOR_BASE_URL=http://${{ secrets.VPS_HOST }}:5678
-          WEBHOOK_URL=http://${{ secrets.VPS_HOST }}:5678/
-          GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
-          EOF
+          echo "N8N_USER=admin" >> .env
+          echo "N8N_PASSWORD=admin123" >> .env
+          echo "N8N_HOST=0.0.0.0" >> .env
+          echo "N8N_EDITOR_BASE_URL=http://${{ secrets.VPS_HOST }}:5678" >> .env
+          echo "WEBHOOK_URL=http://${{ secrets.VPS_HOST }}:5678/" >> .env
+          echo "GENERIC_TIMEZONE=Asia/Ho_Chi_Minh" >> .env
 
-      - name: Copy project files to VPS
+      - name: 📁 Upload docker-compose.yml & .env to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -54,7 +31,7 @@ jobs:
           source: "docker-compose.yml,.env"
           target: "/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
 
-      - name: SSH Deploy
+      - name: 🚀 Deploy N8N via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -93,8 +70,8 @@ jobs:
               exit 1
             fi
 
-            echo "🧹 Cleaning up unused images..."
+            echo "🧹 Cleaning up unused Docker images..."
             docker image prune -f
 
-            echo "✅ N8N deployment completed!"
-            echo "🌐 Access URL: http://${{ secrets.VPS_HOST }}:5678"
+            echo "✅ Deployment completed!"
+            echo "🌐 Access: http://${{ secrets.VPS_HOST }}:5678"
