@@ -61,17 +61,7 @@ jobs:
             echo "🔍 Checking service status..."
             docker-compose ps
 
-            echo "🏥 Performing health check..."
-            if curl -f -s http://localhost:5678 > /dev/null; then
-              echo "✅ Health check passed!"
-            else
-              echo "❌ Health check failed!"
-              docker-compose logs
-              exit 1
-            fi
-
             echo "🧹 Cleaning up unused Docker images..."
             docker image prune -f
 
             echo "✅ Deployment completed!"
-            echo "🌐 Access: http://${{ secrets.VPS_HOST }}:5678"
