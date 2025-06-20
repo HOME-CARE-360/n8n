@@ -21,11 +21,11 @@ jobs:
       - name: Add VPS to known hosts
         run: ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create and send deployment files
+      - name: Create and upload .env + docker-compose.yml
         run: |
           DEPLOY_PATH="/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
 
-          # Create .env file
+          # Create .env
           cat > .env << EOF
           N8N_USER=admin
           N8N_PASSWORD=admin123
@@ -35,51 +35,41 @@ jobs:
           GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
           EOF
 
-          # Create deploy script
-          cat > deploy.sh << EOS
-          #!/bin/bash
-          set -e
-          echo "🚀 Deploying N8N..."
+          # Upload files
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p $DEPLOY_PATH"
+          scp -o StrictHostKeyChecking=no .env docker-compose.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:$DEPLOY_PATH/
 
-          DEPLOY_DIR="${DEPLOY_PATH}"
-          mkdir -p \$DEPLOY_DIR
-          cd \$DEPLOY_DIR
-
-          echo "📦 Stopping containers..."
-          docker-compose down || true
-
-          if [ -d "n8n_data" ]; then
-            echo "💾 Backing up data..."
-            tar -czf "n8n_backup_\$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
-            ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
-          fi
-
-          echo "📥 Pulling latest image..."
-          docker-compose pull
-
-          echo "🚀 Starting containers..."
-          docker-compose up -d
-
-          echo "⏳ Waiting for N8N to be ready..."
-          sleep 20
-
-          echo "✅ Deployment complete!"
-          EOS
-
-          # Copy all files to VPS
-          scp -o StrictHostKeyChecking=no .env docker-compose.yml deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:\$DEPLOY_PATH/
-
-      - name: Run deploy script on VPS
+      - name: Run deployment commands via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "bash /home/${{ secrets.VPS_USER }}/projects/capstone/n8n/deploy.sh"
+          DEPLOY_PATH="/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
+            cd $DEPLOY_PATH
+
+            echo "📦 Stopping current containers..."
+            docker-compose down || true
+
+            echo "💾 Creating backup if exists..."
+            if [ -d "n8n_data" ]; then
+              tar -czf "n8n_backup_\$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
+              ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
+            fi
+
+            echo "📥 Pulling latest Docker image..."
+            docker-compose pull
+
+            echo "🚀 Starting containers..."
+            docker-compose up -d
+
+            echo "⏳ Waiting for N8N..."
+            sleep 20
+          EOF
 
       - name: Health check
         run: |
           echo "🏥 Checking N8N at http://${{ secrets.VPS_HOST }}:5678"
           sleep 10
           if curl -f -s "http://${{ secrets.VPS_HOST }}:5678" > /dev/null; then
-            echo "✅ Health check passed - N8N is running!"
+            echo "✅ Health check passed!"
           else
             echo "❌ Health check failed!"
-            echo "💡 You can manually check at: http://${{ secrets.VPS_HOST }}:5678"
           fi
