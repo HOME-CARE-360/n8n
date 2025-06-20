@@ -1,1 +1,78 @@
-Hello Github
+name: Deploy N8N to VPS
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS to known hosts
+        run: ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create deploy files and send to VPS
+        run: |
+          # Create .env
+          cat > .env << EOF
+          N8N_USER=admin
+          N8N_PASSWORD=admin123
+          N8N_HOST=0.0.0.0
+          N8N_EDITOR_BASE_URL=http://${{ secrets.VPS_HOST }}:5678
+          WEBHOOK_URL=http://${{ secrets.VPS_HOST }}:5678/
+          GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
+          EOF
+
+          # Create deploy script
+          cat > deploy.sh << 'EOS'
+          #!/bin/bash
+          set -e
+          echo "🚀 Deploying N8N..."
+
+          cd /home/${{ secrets.VPS_USER }}/projects/n8n
+          echo "📦 Stopping containers..."
+          docker-compose down || true
+
+          if [ -d "n8n_data" ]; then
+            echo "💾 Backing up existing data..."
+            tar -czf "n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
+            ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
+          fi
+
+          echo "📥 Pulling latest image..."
+          docker-compose pull
+
+          echo "🚀 Starting containers..."
+          docker-compose up -d
+
+          echo "⏳ Waiting for N8N to be ready..."
+          sleep 20
+
+          echo "✅ Deployment complete!"
+          EOS
+
+          # Send everything in one go
+          scp -o StrictHostKeyChecking=no .env docker-compose.yml deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/n8n/
+
+      - name: Execute deploy script on VPS
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "bash /home/${{ secrets.VPS_USER }}/n8n/deploy.sh"
+
+      - name: Health check
+        run: |
+          echo "🏥 Checking N8N at http://${{ secrets.VPS_HOST }}:5678"
+          sleep 10
+          if curl -f -s "http://${{ secrets.VPS_HOST }}:5678" > /dev/null; then
+            echo "✅ Health check passed - N8N is running!"
+          else
+            echo "❌ Health check failed!"
+          fi
