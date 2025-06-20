@@ -21,9 +21,11 @@ jobs:
       - name: Add VPS to known hosts
         run: ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create deploy files and send to VPS
+      - name: Create and send deployment files
         run: |
-          # Create .env
+          DEPLOY_PATH="/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
+
+          # Create .env file
           cat > .env << EOF
           N8N_USER=admin
           N8N_PASSWORD=admin123
@@ -34,18 +36,21 @@ jobs:
           EOF
 
           # Create deploy script
-          cat > deploy.sh << 'EOS'
+          cat > deploy.sh << EOS
           #!/bin/bash
           set -e
           echo "🚀 Deploying N8N..."
 
-          cd /home/${{ secrets.VPS_USER }}/projects/n8n
+          DEPLOY_DIR="${DEPLOY_PATH}"
+          mkdir -p \$DEPLOY_DIR
+          cd \$DEPLOY_DIR
+
           echo "📦 Stopping containers..."
           docker-compose down || true
 
           if [ -d "n8n_data" ]; then
-            echo "💾 Backing up existing data..."
-            tar -czf "n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
+            echo "💾 Backing up data..."
+            tar -czf "n8n_backup_\$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
             ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
           fi
 
@@ -61,11 +66,12 @@ jobs:
           echo "✅ Deployment complete!"
           EOS
 
-          # Send everything in one go
-          scp -o StrictHostKeyChecking=no .env docker-compose.yml deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/n8n/
+          # Copy all files to VPS
+          scp -o StrictHostKeyChecking=no .env docker-compose.yml deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:\$DEPLOY_PATH/
 
-      - name: Execute deploy script on VPS
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "bash /home/${{ secrets.VPS_USER }}/n8n/deploy.sh"
+      - name: Run deploy script on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "bash /home/${{ secrets.VPS_USER }}/projects/capstone/n8n/deploy.sh"
 
       - name: Health check
         run: |
@@ -75,4 +81,5 @@ jobs:
             echo "✅ Health check passed - N8N is running!"
           else
             echo "❌ Health check failed!"
+            echo "💡 You can manually check at: http://${{ secrets.VPS_HOST }}:5678"
           fi
