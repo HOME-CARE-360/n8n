@@ -40,8 +40,8 @@ jobs:
               ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
             fi
 
-            echo "📥 Pulling latest Docker image..."
-            docker-compose pull
+            echo "📥 Build Docker image..."
+            docker-compose build
 
             echo "🚀 Starting containers..."
             docker-compose up -d
