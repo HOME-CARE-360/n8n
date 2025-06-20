@@ -18,9 +18,3 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-UTC}
     volumes:
       - ./n8n_data:/home/node/.n8n
-    networks:
-      - n8n-network
-
-networks:
-  n8n-network:
-    driver: bridge
