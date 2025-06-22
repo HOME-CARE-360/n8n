@@ -19,10 +19,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "."                         # upload tất cả trong repo
-          target: "/home/cikenote/projects/capstone/n8n"
+          source: "./n8n_data, docker-compose.yml" # upload tất cả trong repo
+          target: "/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
           overwrite: true
-          strip_components: 1                 # loại bỏ thư mục repo nếu cần
+          strip_components: 1 # loại bỏ thư mục repo nếu cần
 
       - name: 🚀 SSH into VPS and deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
@@ -31,17 +31,17 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /home/cikenote/projects/capstone
+            cd /home/${{ secrets.VPS_USER }}/projects/capstone/n8n
 
             echo "🔐 Ghi file .env từ secrets"
             cat <<EOF > .env
             N8N_BASIC_AUTH_ACTIVE=true
             N8N_BASIC_AUTH_USER=${{ secrets.N8N_BASIC_AUTH_USER }}
             N8N_BASIC_AUTH_PASSWORD=${{ secrets.N8N_BASIC_AUTH_PASSWORD }}
-            N8N_HOST=103.140.249.115
-            N8N_PORT=5678
+            N8N_HOST=${{ secrets.VPS_HOST }}
+            N8N_PORT=${{ secrets.VPS_HOST }}
             TZ=Asia/Ho_Chi_Minh
-            N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+            N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=${{ secrets.N8N_PORT }}
             N8N_RUNNERS_ENABLED=true
             N8N_RUNNERS_MODE=external
             N8N_RUNNERS_AUTH_TOKEN=${{ secrets.N8N_RUNNERS_AUTH_TOKEN }}
