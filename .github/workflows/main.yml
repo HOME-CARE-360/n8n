@@ -45,7 +45,7 @@ jobs:
             N8N_BASIC_AUTH_USER=${{ secrets.N8N_BASIC_AUTH_USER }}
             N8N_BASIC_AUTH_PASSWORD=${{ secrets.N8N_BASIC_AUTH_PASSWORD }}
             N8N_HOST=${{ secrets.VPS_HOST }}
-            N8N_PORT=${{ secrets.VPS_HOST }}
+            N8N_PORT=${{ secrets.N8N_PORT }}
             TZ=Asia/Ho_Chi_Minh
             N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=${{ secrets.N8N_PORT }}
             N8N_RUNNERS_ENABLED=true
