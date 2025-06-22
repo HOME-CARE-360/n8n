@@ -16,16 +16,15 @@ jobs:
       - name: 🧾 List files before upload (debug)
         run: ls -la
 
-      - name: 📁 Upload source code to VPS via SCP
-        uses: appleboy/scp-action@v0.1.7
+      - name: 📁 Upload source code to VPS via Rsync (exclude .git + .github)
+        uses: burnett01/rsync-deployments@5.2
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "."
-          target: "/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
-          overwrite: true
-          strip_components: 1
+          switches: -avzr --exclude='.git' --exclude='.github'
+          path: ./
+          remote_path: /home/${{ secrets.VPS_USER }}/projects/capstone/n8n
+          remote_host: ${{ secrets.VPS_HOST }}
+          remote_user: ${{ secrets.VPS_USER }}
+          remote_key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: 🧾 List files after upload (debug)
         run: ls -la
