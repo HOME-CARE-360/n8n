@@ -3,6 +3,7 @@ services:
     image: n8nio/n8n
     container_name: n8n
     restart: unless-stopped
+    user: node
     ports:
       - "${N8N_PORT:-5678}:5678"
     env_file:
