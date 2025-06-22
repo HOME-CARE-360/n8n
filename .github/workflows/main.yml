@@ -13,6 +13,9 @@ jobs:
       - name: 📦 Checkout source code
         uses: actions/checkout@v4
 
+      - name: 🧾 List files before upload (debug)
+        run: ls -la
+
       - name: 📁 Upload source code to VPS via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -25,6 +28,9 @@ jobs:
           target: "/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
           overwrite: true
           strip_components: 1
+
+      - name: 🧾 List files after upload (debug)
+        run: ls -la
 
       - name: 🚀 SSH into VPS and deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
