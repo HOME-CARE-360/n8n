@@ -23,6 +23,7 @@ jobs:
           target: "/home/cikenote/projects/capstone/n8n"
           overwrite: true
           strip_components: 1                 # loại bỏ thư mục repo nếu cần
+          exclude: ".git"
 
       - name: 🚀 SSH into VPS and deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
