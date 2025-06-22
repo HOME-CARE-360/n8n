@@ -13,13 +13,13 @@ jobs:
       - name: 📦 Checkout source
         uses: actions/checkout@v4
 
-      - name: 📁 Upload docker-compose.yml & .env to VPS
+      - name: 📁 Upload docker-compose.yml to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "*"
+          source: "docker-compose.yml"
           target: "/home/${{ secrets.VPS_USER }}/projects/capstone/n8n"
 
       - name: 🚀 Deploy N8N via SSH
@@ -29,21 +29,24 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
             cd /home/${{ secrets.VPS_USER }}/projects/capstone/n8n
 
-            echo "💾 Creating backup if exists..."
+            echo "🔐 Creating .env file with secrets..."
+            echo "N8N_BASIC_AUTH_ACTIVE=true" > .env
+            echo "N8N_BASIC_AUTH_USER=${{ secrets.N8N_USER }}" >> .env
+            echo "N8N_BASIC_AUTH_PASSWORD=${{ secrets.N8N_PASSWORD }}" >> .env
+
+            echo "💾 Backing up existing data..."
             if [ -d "n8n_data" ]; then
               tar -czf "n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz" n8n_data/
               ls -t n8n_backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
             fi
 
-            echo "📥 Build Docker image..."
-            docker compose build
+            echo "🐳 Pulling latest Docker image..."
+            docker pull n8nio/n8n
 
-            echo "🚀 Starting containers..."
+            echo "🚀 Starting N8N container..."
             docker compose up -d
-
-            echo "🔍 Checking service status..."
-            docker compose ps
 
             echo "✅ Deployment completed!"
