@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "."                         # upload tất cả trong repo
-          target: "/home/cikenote/projects/capstone"
+          target: "/home/cikenote/projects/capstone/n8n"
           overwrite: true
           strip_components: 1                 # loại bỏ thư mục repo nếu cần
 
