@@ -54,5 +54,6 @@ jobs:
             EOF
 
             echo "🐳 Deploy Docker Compose"
+            chown -R 1000:1000 ./n8n_data
             docker compose down
             docker compose up -d
